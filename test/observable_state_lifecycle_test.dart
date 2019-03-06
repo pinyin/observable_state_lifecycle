@@ -43,7 +43,7 @@ class Test extends StatefulWidget {
 
 class _TestState extends State<Test> with ObservableStateLifecycle<Test> {
   _TestState() {
-    addLifecycleObserver(StateLifecycleSubject<Test>(
+    addLifecycleObserver(LifecycleSubject<Test>.create(
       onInitState: () {
         widget.output(Phase.initState);
       },

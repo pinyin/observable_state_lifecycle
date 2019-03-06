@@ -7,7 +7,7 @@ mixin ObservableStateLifecycle<W extends StatefulWidget> on State<W> {
   @mustCallSuper
   void initState() {
     super.initState();
-    this.lifecycleObservers.forEach((observer) {
+    lifecycleObservers.forEach((observer) {
       observer.onInitState();
     });
   }
@@ -16,7 +16,7 @@ mixin ObservableStateLifecycle<W extends StatefulWidget> on State<W> {
   @mustCallSuper
   void didUpdateWidget(covariant W oldWidget) {
     super.didUpdateWidget(oldWidget);
-    this.lifecycleObservers.forEach((observer) {
+    lifecycleObservers.forEach((observer) {
       observer.onDidUpdateWidget(oldWidget);
     });
   }
@@ -25,7 +25,7 @@ mixin ObservableStateLifecycle<W extends StatefulWidget> on State<W> {
   @mustCallSuper
   void didChangeDependencies() {
     super.didChangeDependencies();
-    this.lifecycleObservers.forEach((observer) {
+    lifecycleObservers.forEach((observer) {
       observer.onDidChangeDependencies();
     });
   }
@@ -34,7 +34,7 @@ mixin ObservableStateLifecycle<W extends StatefulWidget> on State<W> {
   @mustCallSuper
   void reassemble() {
     super.reassemble();
-    this.lifecycleObservers.forEach((observer) {
+    lifecycleObservers.forEach((observer) {
       observer.onReassemble();
     });
   }
@@ -42,7 +42,7 @@ mixin ObservableStateLifecycle<W extends StatefulWidget> on State<W> {
   @override
   @mustCallSuper
   void deactivate() {
-    this.lifecycleObservers.forEach((observer) {
+    lifecycleObservers.forEach((observer) {
       observer.onDeactivate();
     });
     super.deactivate();
@@ -51,46 +51,45 @@ mixin ObservableStateLifecycle<W extends StatefulWidget> on State<W> {
   @override
   @mustCallSuper
   void dispose() {
-    this.lifecycleObservers.forEach((observer) {
+    lifecycleObservers.forEach((observer) {
       observer.onDispose();
     });
     super.dispose();
   }
 
+  // https://github.com/dart-lang/sdk/issues/9589
   @mustCallSuper
-  void addLifecycleObserver(StateLifecycleObserver<W> observer,
+  void addLifecycleObserver(LifecycleObserver<W> observer,
       {bool shouldRunInitState = false}) {
     lifecycleObservers.add(observer);
     if (shouldRunInitState) observer.onInitState();
   }
 
   @mustCallSuper
-  void removeLifecycleObserver(StateLifecycleObserver<W> observer) {
+  void removeLifecycleObserver(LifecycleObserver<W> observer) {
     lifecycleObservers.remove(observer);
   }
 
-  final Set<StateLifecycleObserver<W>> lifecycleObservers =
-      <StateLifecycleObserver<W>>{};
+  final Set<LifecycleObserver<W>> lifecycleObservers = <LifecycleObserver<W>>{};
 }
 
-mixin StateLifecycleObservable<W extends StatefulWidget> {
+mixin LifecycleObservers<W extends StatefulWidget> {
   @mustCallSuper
-  void addObserver(StateLifecycleObserver<W> observer,
+  void addLifecycleObserver(LifecycleObserver<W> observer,
       {bool shouldRunInitState = false}) {
-    observers.add(observer);
+    lifecycleObservers.add(observer);
     if (shouldRunInitState) observer.onInitState();
   }
 
   @mustCallSuper
-  void removeObserver(StateLifecycleObserver<W> observer) {
-    observers.remove(observer);
+  void removeLifecycleObserver(LifecycleObserver<W> observer) {
+    lifecycleObservers.remove(observer);
   }
 
-  final Set<StateLifecycleObserver<W>> observers =
-      <StateLifecycleObserver<W>>{};
+  final Set<LifecycleObserver<W>> lifecycleObservers = <LifecycleObserver<W>>{};
 }
 
-mixin StateLifecycleObserver<W extends StatefulWidget> {
+mixin LifecycleObserver<W extends StatefulWidget> {
   void onInitState() {}
   void onDidUpdateWidget(covariant W oldWidget) {}
   void onDidChangeDependencies() {}
@@ -101,9 +100,78 @@ mixin StateLifecycleObserver<W extends StatefulWidget> {
 
 void _empty([dynamic W]) {}
 
-class StateLifecycleSubject<W extends StatefulWidget> extends Object
-    with StateLifecycleObserver<W>, StateLifecycleObservable<W> {
-  StateLifecycleSubject(
+abstract class LifecycleSubject<W extends StatefulWidget>
+    with LifecycleObserver<W>, LifecycleObservers<W> {
+  LifecycleSubject();
+
+  factory LifecycleSubject.create(
+      {final void Function() onInitState = _empty,
+      final void Function(W oldWidget) onDidUpdateWidget = _empty,
+      final void Function() onDidChangeDependencies = _empty,
+      final void Function() onReassemble = _empty,
+      final void Function() onDeactivate = _empty,
+      final void Function() onDispose = _empty}) {
+    return LifecycleSubjectImpl<W>(
+        onInitState: onInitState,
+        onDidUpdateWidget: onDidUpdateWidget,
+        onDidChangeDependencies: onDidChangeDependencies,
+        onReassemble: onReassemble,
+        onDeactivate: onDeactivate,
+        onDispose: onDispose);
+  }
+
+  @override
+  @mustCallSuper
+  void onInitState() {
+    this.lifecycleObservers.forEach((observer) {
+      observer.onInitState();
+    });
+  }
+
+  @override
+  @mustCallSuper
+  void onDidUpdateWidget(W oldWidget) {
+    this.lifecycleObservers.forEach((observer) {
+      observer.onDidUpdateWidget(oldWidget);
+    });
+  }
+
+  @override
+  @mustCallSuper
+  void onDidChangeDependencies() {
+    this.lifecycleObservers.forEach((observer) {
+      observer.onDidChangeDependencies();
+    });
+  }
+
+  @override
+  @mustCallSuper
+  void onReassemble() {
+    this.lifecycleObservers.forEach((observer) {
+      observer.onReassemble();
+    });
+  }
+
+  @override
+  @mustCallSuper
+  void onDeactivate() {
+    this.lifecycleObservers.forEach((observer) {
+      observer.onInitState();
+    });
+  }
+
+  @override
+  @mustCallSuper
+  void onDispose() {
+    this.lifecycleObservers.forEach((observer) {
+      observer.onDispose();
+    });
+  }
+}
+
+class LifecycleSubjectImpl<W extends StatefulWidget>
+    extends LifecycleSubject<W> {
+  LifecycleSubjectImpl(
       {final void Function() onInitState = _empty,
       final void Function(W oldWidget) onDidUpdateWidget = _empty,
       final void Function() onDidChangeDependencies = _empty,
@@ -128,53 +196,41 @@ class StateLifecycleSubject<W extends StatefulWidget> extends Object
   @mustCallSuper
   void onInitState() {
     _onInitState();
-    this.observers.forEach((observer) {
-      observer.onInitState();
-    });
+    super.onInitState();
   }
 
   @override
   @mustCallSuper
   void onDidUpdateWidget(W oldWidget) {
     _onDidUpdateWidget(oldWidget);
-    this.observers.forEach((observer) {
-      observer.onDidUpdateWidget(oldWidget);
-    });
+    super.onDidUpdateWidget(oldWidget);
   }
 
   @override
   @mustCallSuper
   void onDidChangeDependencies() {
     _onDidChangeDependencies();
-    this.observers.forEach((observer) {
-      observer.onDidChangeDependencies();
-    });
+    super.onDidChangeDependencies();
   }
 
   @override
   @mustCallSuper
   void onReassemble() {
     _onReassemble();
-    this.observers.forEach((observer) {
-      observer.onReassemble();
-    });
+    super.onReassemble();
   }
 
   @override
   @mustCallSuper
   void onDeactivate() {
-    this.observers.forEach((observer) {
-      observer.onInitState();
-    });
+    super.onDeactivate();
     _onDeactivate();
   }
 
   @override
   @mustCallSuper
   void onDispose() {
-    this.observers.forEach((observer) {
-      observer.onDispose();
-    });
+    super.onDispose();
     _onDispose();
   }
 }

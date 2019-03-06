@@ -21,7 +21,7 @@ Then you can call `addLifecycleObserver` in your state:
 ```
 class _TestState extends State<Test> with ObservableStateLifecycle<Test> {
   _TestState() {
-    addLifecycleObserver(StateLifecycleSubject<Test>(
+    addLifecycleObserver(LifecycleSubject<Test>.create(
       onInitState: () {
         widget.output(Phase.initState);
       },
@@ -46,4 +46,4 @@ class _TestState extends State<Test> with ObservableStateLifecycle<Test> {
 
 ```
 
-You can also pass your own instance of `StateLifecycleObserver` to addLifecycleObserver, preferably by creating a subclass of `StateLifecycleSubject`.
+You can also pass your own instance of `LifecycleObserver` to addLifecycleObserver, preferably by creating a subclass of `LifecycleSubject`.
