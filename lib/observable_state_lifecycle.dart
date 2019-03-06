@@ -105,7 +105,7 @@ class StateLifecycleSubject<W extends StatefulWidget> extends Object
     with StateLifecycleObserver<W>, StateLifecycleObservable<W> {
   StateLifecycleSubject(
       {final void Function() onInitState = _empty,
-      final void Function() onDidUpdateWidget = _empty,
+      final void Function(W oldWidget) onDidUpdateWidget = _empty,
       final void Function() onDidChangeDependencies = _empty,
       final void Function() onReassemble = _empty,
       final void Function() onDeactivate = _empty,
@@ -118,7 +118,7 @@ class StateLifecycleSubject<W extends StatefulWidget> extends Object
         _onDispose = onDispose;
 
   final void Function() _onInitState;
-  final void Function() _onDidUpdateWidget;
+  final void Function(W oldWidget) _onDidUpdateWidget;
   final void Function() _onDidChangeDependencies;
   final void Function() _onReassemble;
   final void Function() _onDeactivate;
@@ -136,7 +136,7 @@ class StateLifecycleSubject<W extends StatefulWidget> extends Object
   @override
   @mustCallSuper
   void onDidUpdateWidget(W oldWidget) {
-    _onDidUpdateWidget();
+    _onDidUpdateWidget(oldWidget);
     this.observers.forEach((observer) {
       observer.onDidUpdateWidget(oldWidget);
     });

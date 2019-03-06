@@ -25,7 +25,7 @@ class _TestState extends State<Test> with ObservableStateLifecycle<Test> {
       onInitState: () {
         widget.output(Phase.initState);
       },
-      onDidUpdateWidget: () {
+      onDidUpdateWidget: (Test oldWidget) {
         widget.output(Phase.didUpdateWidget);
       },
       onDidChangeDependencies: () {
