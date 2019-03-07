@@ -10,3 +10,7 @@
 
 * StateLifecycleSubject -> LifecycleSubject
 * StateLifecycleSubject() -> LifecycleSubject.create()
+
+## [0.2.0]
+
+* Callback instead of object

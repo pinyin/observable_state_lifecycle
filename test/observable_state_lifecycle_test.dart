@@ -6,28 +6,37 @@ void main() {
   group('StateObservable', () {
     testWidgets('should call observer on corresponding phase of lifecycle',
         (tester) async {
-      final output = <Phase>[];
-      await tester.pumpWidget(Test(output: (Phase phase) => output.add(phase)));
-      expect(output, [
-        Phase.initState,
-        Phase.initState,
-        Phase.didChangeDependencies,
-        Phase.didChangeDependencies
+      final outputPhase = <StateLifecyclePhase>[];
+      await tester.pumpWidget(
+          Test(output: (StateLifecyclePhase phase) => outputPhase.add(phase)));
+      expect(outputPhase, [
+        StateLifecyclePhase.initState,
+        StateLifecyclePhase.initState,
+        StateLifecyclePhase.didChangeDependencies,
+        StateLifecyclePhase.didChangeDependencies
       ]);
-      output.clear();
-      await tester.pumpWidget(Test(output: (Phase phase) => output.add(phase)));
-      expect(output, [
-        Phase.didUpdateWidget,
-        Phase.didUpdateWidget,
+      outputPhase.clear();
+      await tester.pumpWidget(
+          Test(output: (StateLifecyclePhase phase) => outputPhase.add(phase)));
+      expect(outputPhase, [
+        StateLifecyclePhase.didUpdateWidget,
+        StateLifecyclePhase.didUpdateWidget,
       ]);
-      output.clear();
+      outputPhase.clear();
       await tester.pumpWidget(Container());
-      expect(output, [
-        Phase.deactivate,
-        Phase.deactivate,
-        Phase.dispose,
-        Phase.dispose,
+      expect(outputPhase, [
+        StateLifecyclePhase.deactivate,
+        StateLifecyclePhase.deactivate,
+        StateLifecyclePhase.dispose,
+        StateLifecyclePhase.dispose,
       ]);
+      outputPhase.clear();
+      await tester.pumpWidget(
+          Test(output: (StateLifecyclePhase phase) => outputPhase.add(phase)));
+      expect(find.text('1'), findsOneWidget);
+      await tester.pumpWidget(
+          Test(output: (StateLifecyclePhase phase) => outputPhase.add(phase)));
+      expect(find.text('3'), findsOneWidget);
     });
   });
 }
@@ -35,7 +44,7 @@ void main() {
 class Test extends StatefulWidget {
   const Test({this.output});
 
-  final void Function(Phase phase) output;
+  final void Function(StateLifecyclePhase phase) output;
 
   @override
   _TestState createState() => _TestState();
@@ -43,75 +52,55 @@ class Test extends StatefulWidget {
 
 class _TestState extends State<Test> with ObservableStateLifecycle<Test> {
   _TestState() {
-    addLifecycleObserver(LifecycleSubject<Test>.create(
-      onInitState: () {
-        widget.output(Phase.initState);
-      },
-      onDidUpdateWidget: (Test oldWidget) {
-        widget.output(Phase.didUpdateWidget);
-      },
-      onDidChangeDependencies: () {
-        widget.output(Phase.didChangeDependencies);
-      },
-      onReassemble: () {
-        widget.output(Phase.reassemble);
-      },
-      onDeactivate: () {
-        widget.output(Phase.deactivate);
-      },
-      onDispose: () {
-        widget.output(Phase.dispose);
-      },
-    ));
+    addLifecycleObserver((phase, state) {
+      widget.output(phase);
+      if (phase == StateLifecyclePhase.didUpdateWidget)
+        state.setState(() {
+          n = 3;
+        });
+    });
   }
+
+  int n = 1;
 
   @override
   void initState() {
     super.initState();
-    widget.output(Phase.initState);
+    widget.output(StateLifecyclePhase.initState);
   }
 
   @override
   void didUpdateWidget(Test oldWidget) {
     super.didUpdateWidget(oldWidget);
-    widget.output(Phase.didUpdateWidget);
+    widget.output(StateLifecyclePhase.didUpdateWidget);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    widget.output(Phase.didChangeDependencies);
+    widget.output(StateLifecyclePhase.didChangeDependencies);
   }
 
   @override
   void reassemble() {
     super.reassemble();
-    widget.output(Phase.reassemble);
+    widget.output(StateLifecyclePhase.reassemble);
   }
 
   @override
   void deactivate() {
-    widget.output(Phase.deactivate);
+    widget.output(StateLifecyclePhase.deactivate);
     super.deactivate();
   }
 
   @override
   void dispose() {
-    widget.output(Phase.dispose);
+    widget.output(StateLifecyclePhase.dispose);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Text(n.toString(), textDirection: TextDirection.ltr);
   }
-}
-
-enum Phase {
-  initState,
-  didUpdateWidget,
-  didChangeDependencies,
-  reassemble,
-  deactivate,
-  dispose,
 }

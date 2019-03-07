@@ -21,29 +21,19 @@ Then you can call `addLifecycleObserver` in your state:
 ```
 class _TestState extends State<Test> with ObservableStateLifecycle<Test> {
   _TestState() {
-    addLifecycleObserver(LifecycleSubject<Test>.create(
-      onInitState: () {
-        widget.output(Phase.initState);
-      },
-      onDidUpdateWidget: (Test oldWidget) {
-        widget.output(Phase.didUpdateWidget);
-      },
-      onDidChangeDependencies: () {
-        widget.output(Phase.didChangeDependencies);
-      },
-      onReassemble: () {
-        widget.output(Phase.reassemble);
-      },
-      onDeactivate: () {
-        widget.output(Phase.deactivate);
-      },
-      onDispose: () {
-        widget.output(Phase.dispose);
-      },
-    ));
+    addLifecycleObserver((phase, state){
+      if(phase == StateLifecyclePhase.initState) {
+        // state is an instance of ObservableStateLifecycle, so you can call methods
+        // like addLifecycleObserver or setState on it to achieve composability
+        state.setState((){
+          n = 2;
+        });
+      }
+    });
+
+    int n = 1;
   }
 }
 
 ```
 
-You can also pass your own instance of `LifecycleObserver` to addLifecycleObserver, preferably by creating a subclass of `LifecycleSubject`.
