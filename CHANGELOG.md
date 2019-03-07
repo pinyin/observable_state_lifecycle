@@ -14,3 +14,7 @@
 ## [0.2.0]
 
 * Callback instead of object
+
+## [0.3.0]
+
+* Remove state param from observer

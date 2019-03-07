@@ -1,6 +1,6 @@
 name: observable_state_lifecycle
 description: Make Flutter StatefulWidget's lifecycle observable.
-version: 0.2.0
+version: 0.3.0
 author: Bo Bao <bob432091@gmail.com>
 homepage: https://github.com/pinyin/observable_state_lifecycle
 
