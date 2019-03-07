@@ -18,3 +18,7 @@
 ## [0.3.0]
 
 * Remove state param from observer
+
+## [0.3.1]
+
+* Add `ObserveState` and `ObserveEffect`
