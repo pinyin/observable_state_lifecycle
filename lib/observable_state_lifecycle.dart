@@ -6,37 +6,37 @@ mixin ObservableStateLifecycle<W extends StatefulWidget> on State<W> {
   @override
   @mustCallSuper
   void initState() {
-    lifecycleObservers.forEach((observer) {
-      observer(StateLifecyclePhase.initState, this);
-    });
     super.initState();
+    lifecycleObservers.forEach((observer) {
+      observer(StateLifecyclePhase.initState);
+    });
   }
 
   @override
   @mustCallSuper
   void didUpdateWidget(covariant W oldWidget) {
-    lifecycleObservers.forEach((observer) {
-      observer(StateLifecyclePhase.didUpdateWidget, this);
-    });
     super.didUpdateWidget(oldWidget);
+    lifecycleObservers.forEach((observer) {
+      observer(StateLifecyclePhase.didUpdateWidget);
+    });
   }
 
   @override
   @mustCallSuper
   void didChangeDependencies() {
-    lifecycleObservers.forEach((observer) {
-      observer(StateLifecyclePhase.didChangeDependencies, this);
-    });
     super.didChangeDependencies();
+    lifecycleObservers.forEach((observer) {
+      observer(StateLifecyclePhase.didChangeDependencies);
+    });
   }
 
   @override
   @mustCallSuper
   void reassemble() {
-    lifecycleObservers.forEach((observer) {
-      observer(StateLifecyclePhase.reassemble, this);
-    });
     super.reassemble();
+    lifecycleObservers.forEach((observer) {
+      observer(StateLifecyclePhase.reassemble);
+    });
   }
 
   @override
@@ -47,34 +47,34 @@ mixin ObservableStateLifecycle<W extends StatefulWidget> on State<W> {
   @override
   @mustCallSuper
   void deactivate() {
-    super.deactivate();
     lifecycleObservers.forEach((observer) {
-      observer(StateLifecyclePhase.deactivate, this);
+      observer(StateLifecyclePhase.deactivate);
     });
+    super.deactivate();
   }
 
   @override
   @mustCallSuper
   void dispose() {
-    super.dispose();
     lifecycleObservers.forEach((observer) {
-      observer(StateLifecyclePhase.dispose, this);
+      observer(StateLifecyclePhase.dispose);
     });
+    super.dispose();
   }
 
   // https://github.com/dart-lang/sdk/issues/9589
   @mustCallSuper
-  void addLifecycleObserver(StateLifecycleObserver<W> observer) {
+  void addLifecycleObserver(StateLifecycleObserver observer) {
     lifecycleObservers.add(observer);
   }
 
   @mustCallSuper
-  void removeLifecycleObserver(StateLifecycleObserver<W> observer) {
+  void removeLifecycleObserver(StateLifecycleObserver observer) {
     lifecycleObservers.remove(observer);
   }
 
-  final Set<StateLifecycleObserver<W>> lifecycleObservers =
-      <StateLifecycleObserver<W>>{};
+  final Set<StateLifecycleObserver> lifecycleObservers =
+      <StateLifecycleObserver>{};
 }
 
 enum StateLifecyclePhase {
@@ -86,5 +86,4 @@ enum StateLifecyclePhase {
   dispose,
 }
 
-typedef StateLifecycleObserver<W extends StatefulWidget> = void Function(
-    StateLifecyclePhase phase, ObservableStateLifecycle<W> state);
+typedef StateLifecycleObserver = void Function(StateLifecyclePhase);

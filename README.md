@@ -21,11 +21,9 @@ Then you can call `addLifecycleObserver` in your state:
 ```
 class _TestState extends State<Test> with ObservableStateLifecycle<Test> {
   _TestState() {
-    addLifecycleObserver((phase, state){
+    addLifecycleObserver((phase){
       if(phase == StateLifecyclePhase.initState) {
-        // state is an instance of ObservableStateLifecycle, so you can call methods
-        // like addLifecycleObserver or setState on it to achieve composability
-        state.setState((){
+        setState((){
           n = 2;
         });
       }

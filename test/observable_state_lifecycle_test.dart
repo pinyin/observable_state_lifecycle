@@ -52,10 +52,10 @@ class Test extends StatefulWidget {
 
 class _TestState extends State<Test> with ObservableStateLifecycle<Test> {
   _TestState() {
-    addLifecycleObserver((phase, state) {
+    addLifecycleObserver((phase) {
       widget.output(phase);
       if (phase == StateLifecyclePhase.didUpdateWidget)
-        state.setState(() {
+        setState(() {
           n = 3;
         });
     });
